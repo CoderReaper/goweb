@@ -1,8 +1,8 @@
 package main
 
 import (
-	"hello/controllers"
-	_ "hello/routers"
+	"goweb/controllers"
+	_ "goweb/routers"
 
 	"github.com/astaxie/beego"
 )

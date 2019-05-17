@@ -80,7 +80,8 @@
     <form id="login" method="post">
     email:    <input type="text" name="email"><br>
     password: <input type="password" name="password"><br>
-    login: <input type="submit" name="lastname" method = "post">
+    name: <input type="text" name="name"><br>
+    login: <input type="submit" method = "post">
     </form>
     
   </header>

@@ -16,31 +16,42 @@ func (c *RegisterController) Get() {
 	//c.Ctx.WriteString("heloword")
 }
 
-//注册
+//Post 注册
 func (c *RegisterController) Post() {
 	//检测email
 	var email = c.GetString("email")
-	if !util.CheckEmail(email) {
-		c.Ctx.WriteString("'result':'fake','reason':'invalid email'}")
-		return
-	}
-	//检测username
-	var name = c.GetString("name")
-	if !util.CheckUserName(name) {
-		c.Ctx.WriteString("'result':'fake','reason':'invalid name'}")
+
+	if !util.CheckEmail(email) || !module.EmailIsRegister(email) {
+		//c.Ctx.WriteString("'result':'fake','reason':'invalid email'}")
+		c.Data["msg"] = "invalid email"
+		c.Data["result"] = "fail"
+		c.ServeJSON()
 		return
 	}
 
+	//检测username
+	var name = c.GetString("name")
+	if !util.CheckUserName(name) || !module.UserNameIsRegister(name) {
+		c.Data["msg"] = "invalid name"
+		c.Data["result"] = "fail"
+		c.ServeJSON()
+		return
+	}
 	//检测password
 	var pswd = c.GetString("password")
 	if !util.CheckPassWord(pswd) {
-		c.Ctx.WriteString("'result':'fake','reason':'invalid pswd'}")
+		c.Data["msg"] = "invalid password"
+		c.Data["result"] = "fail"
+		c.ServeJSON()
 		return
 	}
+
 	//可以注册
 	password, err := bcrypt.GenerateFromPassword([]byte(pswd+name), 4)
 	if err != nil {
-		c.Ctx.WriteString("'result':'fake','reason':'unknown reason'}")
+		c.Data["msg"] = "unknown reason"
+		c.Data["result"] = "fail"
+		c.ServeJSON()
 		return
 	}
 	//db操作
@@ -48,11 +59,12 @@ func (c *RegisterController) Post() {
 	encodePassWord := string(password[:])
 	err = module.Register(email, name, encodePassWord)
 	if err != nil {
-		beego.Warning("user register fail err %s", err)
-		c.Ctx.WriteString("'result':'fake','reason':'unknown reason'}")
+		c.Data["msg"] = "unknown reason"
+		c.Data["result"] = "fail"
+		c.ServeJSON()
 		return
 	}
-	
+
 	//登录成功
 	c.Redirect("/user", 301)
 }

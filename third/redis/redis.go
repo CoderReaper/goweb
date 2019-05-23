@@ -1,6 +1,7 @@
 package myredis
 
 import (
+	"strconv"
 	"sync"
 	"time"
 
@@ -339,4 +340,76 @@ func Do(commandName string, args ...interface{}) (reply interface{}, err error) 
 	reply, err = conn.Do(commandName, args...)
 	defer PutBack(conn)
 	return
+}
+
+//MyRedisErr err
+type MyRedisErr struct {
+	err string
+}
+
+func (redis *MyRedisErr) Error() string {
+	return redis.err
+}
+
+//RedisSyncLock 分布式锁实现
+type RedisSyncLock struct {
+	Lockkey string
+	Expr    int64
+}
+
+//Lock 锁
+func (lock *RedisSyncLock) Lock(cnn redis.Conn) (bool, error) {
+	if cnn == nil {
+		return false, &MyRedisErr{err: "cnn is nil"}
+	}
+	for i := 1; i < 500; i++ {
+		//过期时间
+		tm := time.Now().Unix() + lock.Expr
+		//设置锁
+		result, err := cnn.Do(SETNX, lock.Lockkey, strconv.FormatInt(tm, 0))
+		//未知错误
+		if err != nil {
+			return false, err
+		}
+		//设置成功
+		if result != nil {
+			return true, nil
+		}
+		//获取旧的值
+		result, err = cnn.Do(GET, lock.Lockkey)
+		if err != nil {
+			return false, err
+		}
+		//如果获取到的是空值那么就设置成0
+		if result == nil {
+			result = "0"
+		}
+		oldvalue, _ := strconv.Atoi(result.(string))
+		//检查时间是否是已经过期
+		if uint32(oldvalue) <= uint32(time.Now().Unix()) {
+			//如果已经过期直接getset
+			result, err = cnn.Do(GETSET, lock.Lockkey, strconv.FormatInt(tm, 0))
+			newvalue, _ := strconv.Atoi(result.(string))
+			//设置成功
+			if oldvalue == newvalue {
+				return true, nil
+			}
+		}
+		//不成功休息下继续轮询
+		select {
+		//休息10ms
+		case <-time.After(time.Millisecond * 10):
+			continue
+		}
+	}
+	return false, nil
+}
+
+/*
+	理论上有可能会导致释放掉不是我自己加的锁,为了避免这种情况,
+	再加锁的时候过期时间尽量设置的比较长一点,尽量不要产生超时被其它锁给抢占的情况
+*/
+//Unlock 释放锁
+func (lock *RedisSyncLock) Unlock(cnn redis.Conn) {
+	cnn.Do(DEL, lock.Lockkey)
 }

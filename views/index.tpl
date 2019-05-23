@@ -78,10 +78,17 @@
        wolegequ
     </div>
     <form id="login" method="post">
-    email:    <input type="text" name="email"><br>
-    password: <input type="password" name="password"><br>
-    name: <input type="text" name="name"><br>
-    login: <input type="submit" method = "post">
+    {{if not .login}}
+      email:    <input type="text" name="email"><br>
+      password: <input type="password" name="password"><br>
+      name: <input type="text" name="name"><br>
+      login: <input type="submit" method = "post">
+    {{else}}
+      email or username:   <input type="text" name="uestr"><br>
+      password: <input type="password" name="password"><br>
+      login: <input type="submit" method = "post">
+    {{end}}
+
     </form>
     
   </header>

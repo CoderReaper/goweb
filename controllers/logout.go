@@ -8,8 +8,20 @@ type LogOutController struct {
 	beego.Controller
 }
 
+//Get .
 func (c *LogOutController) Get() {
-	//	c.Data["Website"] = "beego.me"
-	//	c.Data["Email"] = "astaxie@gmail.com"
 	c.TplName = "index.tpl"
+}
+
+//Post .
+func (c *LogOutController) Post() {
+	c.TplName = "index.tpl"
+	logout := c.GetString("logout")
+	//email := c.Ctx.GetCookie("email")
+	//name := c.Ctx.GetCookie("name")
+	token := c.Ctx.GetCookie("token")
+	if logout != "" && token != "" {
+		c.Ctx.SetCookie("token", "")
+	}
+	c.Redirect("/login", 301)
 }

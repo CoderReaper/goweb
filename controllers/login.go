@@ -15,10 +15,8 @@ type LoginController struct {
 //Get
 func (c *LoginController) Get() {
 	c.TplName = "index.tpl"
-	c.Data["login"] = "true"
-	c.Data["msg"] = "unknown reason"
-	c.Data["result"] = "fail"
-	c.ServeJSON()
+	c.Data["login"] = "login"
+	//c.ServeJSON()
 	//c.Ctx.WriteString("heloword")
 }
 
@@ -39,13 +37,25 @@ func (c *LoginController) Post() {
 	}
 	if err != nil {
 		beego.Emergency("user login fail %s", err.Error())
-		c.Ctx.WriteString("login fail ")
+		rsp := HTTPRetMessage{
+			Ret:    "fail",
+			Reason: err.Error(),
+			Data:   "",
+		}
+		c.Data["json"] = &rsp
+		c.ServeJSON()
 		return
 	}
 	ret, err := module.Login(email, name, password)
 	if err != nil || !ret {
 		beego.Info("login fail email %s", email)
-		c.Ctx.WriteString("login fail ")
+		rsp := HTTPRetMessage{
+			Ret:    "fail",
+			Reason: err.Error(),
+			Data:   "",
+		}
+		c.Data["json"] = &rsp
+		c.ServeJSON()
 		return
 	}
 	//生成token

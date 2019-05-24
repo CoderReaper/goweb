@@ -306,7 +306,7 @@ const (
 )
 
 func connect() (redis.Conn, error) {
-	con, err := redis.Dial("tcp", "35.236.107.65:6379",
+	con, err := redis.Dial("tcp", "127.0.0.1:6379",
 		redis.DialPassword("sunmoon"),
 		redis.DialDatabase(0),
 		redis.DialConnectTimeout(60*time.Second),

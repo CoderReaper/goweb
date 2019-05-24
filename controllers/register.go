@@ -7,10 +7,19 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+//HTTPRetMessage call back
+type HTTPRetMessage struct {
+	Ret    string `json:"ret"`
+	Reason string `json:"reason"`
+	Data   string `json:"data"`
+}
+
+//RegisterController .
 type RegisterController struct {
 	beego.Controller
 }
 
+//Get .
 func (c *RegisterController) Get() {
 	c.TplName = "index.tpl"
 	//c.Ctx.WriteString("heloword")
@@ -20,11 +29,14 @@ func (c *RegisterController) Get() {
 func (c *RegisterController) Post() {
 	//检测email
 	var email = c.GetString("email")
-
 	if !util.CheckEmail(email) || !module.EmailIsRegister(email) {
 		//c.Ctx.WriteString("'result':'fake','reason':'invalid email'}")
-		c.Data["msg"] = "invalid email"
-		c.Data["result"] = "fail"
+		rsp := HTTPRetMessage{
+			Ret:    "fail",
+			Reason: "invalid email",
+			Data:   "check your email",
+		}
+		c.Data["json"] = &rsp
 		c.ServeJSON()
 		return
 	}
@@ -32,16 +44,24 @@ func (c *RegisterController) Post() {
 	//检测username
 	var name = c.GetString("name")
 	if !util.CheckUserName(name) || !module.UserNameIsRegister(name) {
-		c.Data["msg"] = "invalid name"
-		c.Data["result"] = "fail"
+		rsp := HTTPRetMessage{
+			Ret:    "fail",
+			Reason: "invalid name",
+			Data:   "check your name",
+		}
+		c.Data["json"] = &rsp
 		c.ServeJSON()
 		return
 	}
 	//检测password
 	var pswd = c.GetString("password")
 	if !util.CheckPassWord(pswd) {
-		c.Data["msg"] = "invalid password"
-		c.Data["result"] = "fail"
+		rsp := HTTPRetMessage{
+			Ret:    "fail",
+			Reason: "invalid password",
+			Data:   "check your password",
+		}
+		c.Data["json"] = &rsp
 		c.ServeJSON()
 		return
 	}
@@ -49,8 +69,12 @@ func (c *RegisterController) Post() {
 	//可以注册
 	password, err := bcrypt.GenerateFromPassword([]byte(pswd+name), 4)
 	if err != nil {
-		c.Data["msg"] = "unknown reason"
-		c.Data["result"] = "fail"
+		rsp := HTTPRetMessage{
+			Ret:    "fail",
+			Reason: "unknown reason",
+			Data:   "please try later ",
+		}
+		c.Data["json"] = &rsp
 		c.ServeJSON()
 		return
 	}
@@ -59,8 +83,12 @@ func (c *RegisterController) Post() {
 	encodePassWord := string(password[:])
 	err = module.Register(email, name, encodePassWord)
 	if err != nil {
-		c.Data["msg"] = "unknown reason"
-		c.Data["result"] = "fail"
+		rsp := HTTPRetMessage{
+			Ret:    "fail",
+			Reason: "unknown reason",
+			Data:   "please try later ",
+		}
+		c.Data["json"] = &rsp
 		c.ServeJSON()
 		return
 	}

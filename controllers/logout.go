@@ -17,8 +17,6 @@ func (c *LogOutController) Get() {
 func (c *LogOutController) Post() {
 	c.TplName = "index.tpl"
 	logout := c.GetString("logout")
-	//email := c.Ctx.GetCookie("email")
-	//name := c.Ctx.GetCookie("name")
 	token := c.Ctx.GetCookie("token")
 	if logout != "" && token != "" {
 		c.Ctx.SetCookie("token", "")

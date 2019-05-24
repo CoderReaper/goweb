@@ -21,7 +21,13 @@ func (c *UserController) Get() {
 	//验证token
 	b, err := util.CheckToken(token, email)
 	if err != nil {
-		c.Ctx.WriteString("get user check token fail ")
+		rsp := HTTPRetMessage{
+			Ret:    "fail",
+			Reason: err.Error(),
+			Data:   "please try later",
+		}
+		c.Data["json"] = &rsp
+		c.ServeJSON()
 		return
 	}
 	//失败
@@ -30,5 +36,11 @@ func (c *UserController) Get() {
 		return
 	}
 	str := fmt.Sprintf("%s", name)
-	c.Ctx.WriteString("hello " + str)
+	rsp := HTTPRetMessage{
+		Ret:    "ok",
+		Reason: "",
+		Data:   "hello " + str,
+	}
+	c.Data["json"] = &rsp
+	c.ServeJSON()
 }

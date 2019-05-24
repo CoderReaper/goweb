@@ -2,6 +2,7 @@ package module
 
 import (
 	"encoding/json"
+	"errors"
 	"time"
 
 	myredis "github.com/CoderReaper/goweb/third/redis"
@@ -38,7 +39,7 @@ func Login(email string, name string, pass string) (bool, error) {
 	err = bcrypt.CompareHashAndPassword([]byte(userdata.Password), []byte(pass+name))
 	if err != nil {
 		beego.Warning("module user Login password fail")
-		return false, nil
+		return false, errors.New("invalid password")
 	}
 	//succ
 	beego.Info("module user login succ %v", ret)

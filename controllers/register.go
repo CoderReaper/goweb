@@ -29,7 +29,7 @@ func (c *RegisterController) Get() {
 func (c *RegisterController) Post() {
 	//检测email
 	var email = c.GetString("email")
-	if !util.CheckEmail(email) || !module.EmailIsRegister(email) {
+	if !util.CheckEmail(email) {
 		//c.Ctx.WriteString("'result':'fake','reason':'invalid email'}")
 		rsp := HTTPRetMessage{
 			Ret:    "fail",
@@ -40,14 +40,34 @@ func (c *RegisterController) Post() {
 		c.ServeJSON()
 		return
 	}
+	if !module.EmailIsRegister(email) {
+		rsp := HTTPRetMessage{
+			Ret:    "fail",
+			Reason: "email has register yet",
+			Data:   "change another email or use this email login",
+		}
+		c.Data["json"] = &rsp
+		c.ServeJSON()
+		return
+	}
 
 	//检测username
 	var name = c.GetString("name")
-	if !util.CheckUserName(name) || !module.UserNameIsRegister(name) {
+	if !util.CheckUserName(name) {
 		rsp := HTTPRetMessage{
 			Ret:    "fail",
 			Reason: "invalid name",
 			Data:   "check your name",
+		}
+		c.Data["json"] = &rsp
+		c.ServeJSON()
+		return
+	}
+	if !module.UserNameIsRegister(name) {
+		rsp := HTTPRetMessage{
+			Ret:    "fail",
+			Reason: "name has register yet",
+			Data:   "change another name or use this name login",
 		}
 		c.Data["json"] = &rsp
 		c.ServeJSON()

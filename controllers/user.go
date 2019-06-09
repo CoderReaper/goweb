@@ -41,6 +41,7 @@ func (c *UserController) Get() {
 		Reason: "",
 		Data:   "hello " + str,
 	}
+	beego.Info("module user Login token %s", token)
 	c.Data["json"] = &rsp
 	c.ServeJSON()
 }

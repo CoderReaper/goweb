@@ -9,7 +9,7 @@ import (
 
 func main() {
 	//开启日志
-	beego.SetLogger(logs.AdapterFile, "{\"filename\": \"~/log/goweb/beego.log\"}")
+	beego.SetLogger(logs.AdapterFile, "{\"filename\": \"/home/gclod/log/goweb/beego.log\"}")
 	beego.SetLevel(logs.LevelDebug)
 	beego.SetLogFuncCall(true)
 	//session
